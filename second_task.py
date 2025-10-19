@@ -12,21 +12,16 @@ class VernamWithEquivalentKeys:
             length = self.key_length
         return random.randint(10 ** (length - 1), 10 ** length - 1)
 
-    def calculate_prefix_sum(self, number):
-        """Вычисление префиксной суммы цифр числа"""
-        return sum(int(digit) for digit in str(number))
 
     def create_equivalent_key(self, original_key: int, parameter):
         """
-        Создание равнозначного ключа по алгоритму 'Префиксное умножение'
+        Создание равнозначного ключа
         Формат: [M][S][S_Length][p] где M = original_key × (S + p), S = сумма цифр original_key
         """
         S = sum(int(n) for n in str(original_key))
         M = original_key * (S + parameter)
 
         length_s = len(str(S))
-        # # Всегда представляем S как 2 цифры (01, 02, ..., 99)
-        # S_str = str(S).zfill(3)
 
         # Формируем элемент группы: [M][S][S_Length][p]
         equivalent_key = int(f"{M}{S}{length_s}{parameter}")
@@ -35,7 +30,6 @@ class VernamWithEquivalentKeys:
     def extract_original_key(self, equivalent_key):
         """Извлечение исходного ключа из равнозначного ключа"""
         key_str = str(equivalent_key)
-
         # Параметр - первая цифра
         parameter = int(key_str[-1])
         # значение без параметра
@@ -53,8 +47,6 @@ class VernamWithEquivalentKeys:
 
         # Восстанавливаем исходный ключ
         original_key = M // (S + parameter)
-
-        # print(f"Original key - {original_key}")
 
         return original_key, parameter
 
@@ -112,9 +104,9 @@ class VernamWithEquivalentKeys:
     def vernam_encrypt(self, plaintext, key):
         """Шифрование методом Вернама (однократное гаммирование)"""
         binary_text = self.text_to_binary(plaintext)
-        print(f"binary text - {binary_text}")
+        # print(f"binary text - {binary_text}")
         gamma = self.generate_gamma(key, len(binary_text))
-        print(f"gamma - {gamma}")
+        # print(f"gamma - {gamma}")
 
         # Побитовое XOR
         encrypted_binary = ''.join(
@@ -127,7 +119,7 @@ class VernamWithEquivalentKeys:
     def vernam_decrypt(self, encrypted_binary, key):
         """Дешифрование методом Вернама"""
         gamma = self.generate_gamma(key, len(encrypted_binary))
-        print(encrypted_binary, gamma, sep='****')
+        # print(encrypted_binary, gamma, sep='****')
         # Побитовое XOR (аналогично шифрованию)
         decrypted_binary = ''.join(
             str(int(enc_bit) ^ int(gamma_bit))

@@ -48,8 +48,8 @@ if __name__ == "__main__":
     center_message = 'Штирлиц - Вы Герой!!'
     center_message_hex = get_message_hex(center_message)
     ciphertext = xor_algorithm(center_key, center_message_hex)
-    print(f"{ciphertext} - шифротекст при известном ключе и сообщении")
+    print(f"{ciphertext} - шифротекст при известном ключе и сообщении \"{center_message}\"")
     expected_message = 'СНовымГодом, друзья!'
     expected_message_hex = get_message_hex(expected_message)
     expected_key = xor_algorithm(ciphertext, expected_message_hex)
-    print(f"{expected_key} - ключ по известному шифротексту и сообщению")
+    print(f"{expected_key} - ключ по известному шифротексту и ожидаемому сообщению \"{expected_message}\"")
