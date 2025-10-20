@@ -81,52 +81,38 @@ class VernamWithEquivalentKeys:
                     key_group.append(key)
         return key_group
 
-    def text_to_binary(self, text):
+    def text_to_ascii(self, text) -> list[int]:
         """Преобразование текста в бинарную строку"""
-        return ''.join(format(ord(char), '08b') for char in text)
+        return [ord(char) - ord('А') + 192 if ord(char) > 200 else ord(char) for char in text]
 
-    def binary_to_text(self, binary_str):
-        """Преобразование бинарной строки в текст"""
-        text = ''
-        for i in range(0, len(binary_str), 8):
-            byte = binary_str[i:i + 8]
-            text += chr(int(byte, 2))
-        return text
 
-    def generate_gamma(self, key, length):
-        """Генерация гаммы из ключа для шифрования"""
-        key_str = str(key)
-        gamma = ''
-        while len(gamma) < length:
-            gamma += key_str
-        return gamma[:length]
-
-    def vernam_encrypt(self, plaintext, key):
+    def vernam_encrypt(self, plaintext: str, key: int):
         """Шифрование методом Вернама (однократное гаммирование)"""
-        binary_text = self.text_to_binary(plaintext)
-        # print(f"binary text - {binary_text}")
-        gamma = self.generate_gamma(key, len(binary_text))
+        ascii_text = self.text_to_ascii(plaintext)
+        # print(f"binary text - {ascii_text}")
+        # gamma = self.generate_gamma(key, len(ascii_text))
         # print(f"gamma - {gamma}")
 
         # Побитовое XOR
-        encrypted_binary = ''.join(
-            str(int(text_bit) ^ int(gamma_bit))
-            for text_bit, gamma_bit in zip(binary_text, gamma)
-        )
+        encrypted_ascii = [
+            chr(ascii_bit ^ int(gamma_bit))
+            for ascii_bit, gamma_bit in zip(ascii_text, str(key))
+        ]
 
-        return encrypted_binary
+        return ''.join(encrypted_ascii)
 
-    def vernam_decrypt(self, encrypted_binary, key):
+    def vernam_decrypt(self, encrypted_char:str, key) -> str:
         """Дешифрование методом Вернама"""
-        gamma = self.generate_gamma(key, len(encrypted_binary))
+        # gamma = self.generate_gamma(key, len(encrypted_binary))
         # print(encrypted_binary, gamma, sep='****')
         # Побитовое XOR (аналогично шифрованию)
-        decrypted_binary = ''.join(
-            str(int(enc_bit) ^ int(gamma_bit))
-            for enc_bit, gamma_bit in zip(encrypted_binary, gamma)
-        )
+        ascii_text = self.text_to_ascii(encrypted_char)
+        decrypted_ascii = [
+            chr(enc_bit ^ int(gamma_bit))
+            for enc_bit, gamma_bit in zip(ascii_text, str(key))
+        ]
 
-        return self.binary_to_text(decrypted_binary)
+        return ''.join(decrypted_ascii)
 
 
 def main():
@@ -183,14 +169,14 @@ def main():
             print(f"Параметр: {parameter}, Исходный ключ: {original_key}")
 
             plaintext = input("\nВведите сообщение для шифрования: ")
-            encrypted = app.vernam_encrypt(plaintext, key)
+            encrypted_chars = app.vernam_encrypt(plaintext, original_key)  # ['96', '97', '108', '104', '107'] example
 
-            print(f"\nЗашифрованное сообщение (бинарный вид):")
-            print(encrypted)
+            print(f"\nЗашифрованное сообщение (символьный вид):")
+            print(encrypted_chars)
 
             # Сохраняем зашифрованное сообщение
             with open("encrypted.txt", 'w', encoding='utf-8') as f:
-                f.write(encrypted)
+                f.write(encrypted_chars)
             print("Зашифрованное сообщение сохранено в encrypted.txt")
 
         elif choice == '3':
@@ -213,9 +199,9 @@ def main():
             # Загрузка зашифрованного сообщения
             try:
                 with open("encrypted.txt", 'r', encoding='utf-8') as f:
-                    encrypted = f.read().strip()
+                    encrypted_chars = f.read().strip()
 
-                decrypted = app.vernam_decrypt(encrypted, key)
+                decrypted = app.vernam_decrypt(encrypted_chars, original_key)
                 print(f"\nРасшифрованное сообщение: {decrypted}")
 
             except FileNotFoundError:
