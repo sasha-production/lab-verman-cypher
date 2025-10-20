@@ -86,7 +86,7 @@ class VernamWithEquivalentKeys:
         return [ord(char) - ord('А') + 192 if ord(char) > 200 else ord(char) for char in text]
 
 
-    def vernam_encrypt(self, plaintext: str, key: int):
+    def vernam_xor(self, plaintext: str, key: int):
         """Шифрование методом Вернама (однократное гаммирование)"""
         ascii_text = self.text_to_ascii(plaintext)
         # print(f"binary text - {ascii_text}")
@@ -101,18 +101,6 @@ class VernamWithEquivalentKeys:
 
         return ''.join(encrypted_ascii)
 
-    def vernam_decrypt(self, encrypted_char:str, key) -> str:
-        """Дешифрование методом Вернама"""
-        # gamma = self.generate_gamma(key, len(encrypted_binary))
-        # print(encrypted_binary, gamma, sep='****')
-        # Побитовое XOR (аналогично шифрованию)
-        ascii_text = self.text_to_ascii(encrypted_char)
-        decrypted_ascii = [
-            chr(enc_bit ^ int(gamma_bit))
-            for enc_bit, gamma_bit in zip(ascii_text, str(key))
-        ]
-
-        return ''.join(decrypted_ascii)
 
 
 def main():
@@ -169,7 +157,7 @@ def main():
             print(f"Параметр: {parameter}, Исходный ключ: {original_key}")
 
             plaintext = input("\nВведите сообщение для шифрования: ")
-            encrypted_chars = app.vernam_encrypt(plaintext, original_key)  # ['96', '97', '108', '104', '107'] example
+            encrypted_chars = app.vernam_xor(plaintext, original_key)
 
             print(f"\nЗашифрованное сообщение (символьный вид):")
             print(encrypted_chars)
@@ -201,7 +189,7 @@ def main():
                 with open("encrypted.txt", 'r', encoding='utf-8') as f:
                     encrypted_chars = f.read().strip()
 
-                decrypted = app.vernam_decrypt(encrypted_chars, original_key)
+                decrypted = app.vernam_xor(encrypted_chars, original_key)
                 print(f"\nРасшифрованное сообщение: {decrypted}")
 
             except FileNotFoundError:
